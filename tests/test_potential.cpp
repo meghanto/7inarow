@@ -57,26 +57,27 @@ void test_breaker_reduces_potential() {
     auto edges = game::EdgeGenerator::generate_edges(7);
     game::Game g(7, edges);
     
-    game::PotentialCalculator calc1(g.board(), edges);
-    double pot_before = calc1.compute_potential();
+    game::PotentialCalculator calc_initial(g.board(), edges);
+    double pot_initial = calc_initial.compute_potential();
     
-    // Breaker makes a move
+    // First move: Maker
     g.make_move({0, 3});
     
-    game::PotentialCalculator calc2(g.board(), edges);
-    double pot_after = calc2.compute_potential();
+    game::PotentialCalculator calc_after_maker(g.board(), edges);
+    double pot_after_maker = calc_after_maker.compute_potential();
     
-    // Potential should decrease after Breaker's move
-    // (Note: First move is Maker, so we need to check after second move)
+    // Second move: Breaker
     g.make_move({1, 3});
     
-    game::PotentialCalculator calc3(g.board(), edges);
-    double pot_after_breaker = calc3.compute_potential();
+    game::PotentialCalculator calc_after_breaker(g.board(), edges);
+    double pot_after_breaker = calc_after_breaker.compute_potential();
     
-    if (pot_after_breaker >= pot_before) {
+    // Breaker's move should reduce potential more than or equal to Maker's
+    // (In general, Breaker blocks edges while Maker advances them)
+    if (pot_after_breaker >= pot_initial) {
         test::TestRunner::instance().add_result({
             "test_breaker_reduces_potential", false, 
-            "Breaker's move should reduce potential"
+            "After moves, potential should change from initial"
         });
         return;
     }

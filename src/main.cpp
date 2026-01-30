@@ -46,13 +46,16 @@ void simulate_random_game(int32_t num_cols, int32_t seed, int32_t max_moves) {
         
         game::Player current = g.current_player();
         
+        // Check Breaker certificate BEFORE the move (when it's Breaker's turn)
+        game::PotentialCalculator calc_before(g.board(), edges);
+        bool breaker_cert = (current == game::Player::Breaker) && calc_before.has_breaker_certificate();
+        
         // Make move
         auto result = g.make_move(cell);
         
         // Compute potential after move
         game::PotentialCalculator calc(g.board(), edges);
         double pot = calc.compute_potential();
-        bool breaker_cert = (g.current_player() == game::Player::Breaker) && calc.has_breaker_certificate();
         
         // Print stats
         std::cout << game::Formatter::format_move_stats(move, current, cell, pot, 

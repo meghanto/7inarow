@@ -23,12 +23,9 @@ std::vector<Hyperedge> EdgeGenerator::generate_edges(int32_t num_cols) {
         canonicalize(edge);
     }
     
-    // Remove duplicates
-    std::set<Hyperedge> unique_edges(edges.begin(), edges.end());
-    edges.assign(unique_edges.begin(), unique_edges.end());
-    
-    // Sort edges for stable output
+    // Sort and remove duplicates efficiently
     std::sort(edges.begin(), edges.end());
+    edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
     
     return edges;
 }

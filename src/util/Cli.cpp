@@ -20,15 +20,27 @@ CliArgs CliParser::parse(int argc, char* argv[]) {
         std::string arg(argv[i]);
         if (arg == "-n" || arg == "--cols") {
             if (i + 1 < argc) {
-                args.num_cols = std::stoi(argv[++i]);
+                try {
+                    args.num_cols = std::stoi(argv[++i]);
+                } catch (const std::exception&) {
+                    throw std::invalid_argument("Invalid value for " + arg + ": expected integer");
+                }
             }
         } else if (arg == "-s" || arg == "--seed") {
             if (i + 1 < argc) {
-                args.seed = std::stoi(argv[++i]);
+                try {
+                    args.seed = std::stoi(argv[++i]);
+                } catch (const std::exception&) {
+                    throw std::invalid_argument("Invalid value for " + arg + ": expected integer");
+                }
             }
         } else if (arg == "-m" || arg == "--max-moves") {
             if (i + 1 < argc) {
-                args.max_moves = std::stoi(argv[++i]);
+                try {
+                    args.max_moves = std::stoi(argv[++i]);
+                } catch (const std::exception&) {
+                    throw std::invalid_argument("Invalid value for " + arg + ": expected integer");
+                }
             }
         }
     }
