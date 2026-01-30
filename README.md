@@ -146,6 +146,18 @@ where:
 
 When it's Breaker's turn and pot(b) < 1, Breaker has a certificate that they can prevent Maker from winning.
 
+### Complexity Analysis
+
+For detailed time and space complexity analysis of all operations, see [COMPLEXITY.md](COMPLEXITY.md).
+
+**Summary**:
+- Edge generation: O(n log n) time, O(n) space
+- Single move: O(n) time (includes win detection)
+- Potential calculation: O(n) time
+- Full game: O(n²) time for up to 4n moves
+
+Where n is the number of columns in the board.
+
 ### Cross-Platform Compatibility
 
 The code uses:
