@@ -51,8 +51,8 @@ void EdgeGenerator::add_horizontal_edges(std::vector<Hyperedge>& edges, int32_t 
             edges.push_back(edge);
         }
         
-        // Interior length-7 edges start at column 1 through n-7 (1-indexed: 2..n-7)
-        for (int32_t start_col = 1; start_col + 7 <= num_cols - 1; ++start_col) {
+        // Interior length-7 edges start at column 1 through n-7 (0-indexed)
+        for (int32_t start_col = 1; start_col + 7 <= num_cols; ++start_col) {
             Hyperedge edge;
             for (int32_t i = 0; i < 7; ++i) {
                 edge.push_back({row, start_col + i});
