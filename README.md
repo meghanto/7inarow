@@ -129,6 +129,38 @@ Tests verify:
 
 ## Implementation Details
 
+## Algorithms Needed to Recreate the Paper
+
+To reproduce the end-to-end results from "Towards solving the 7‑in‑a‑row game," the implementation needs the following algorithms. This repository currently implements the finite $(4,n,7^{tr})$ game construction, l-line counts, and potential formula; the remaining items describe the solver features required by the paper.
+
+### A) Game Construction $(4,n,7^{tr})$
+- **Truncated edge generator**: Build hyperedges for first/last 4 cells in each row, all length-7 windows, all vertical 4-edges, both diagonal 4-edge families, and the extra short boundary edges from Section III.
+- **Edge representation**: Store hyperedges as bitmasks over the $4n$ squares (or another constant-time membership structure) to update/kill edges quickly after moves.
+- **Tiling reduction support**: Use the truncated edge set so that finite-block results can be lifted to the infinite board (Theorems III.1 and III.3).
+
+### B) Core Solver: Proof-Number Search (PNS)
+- **AND/OR game graph**: OR nodes for Maker-to-move, AND nodes for Breaker-to-move, with terminal outcomes defined by Maker completing a hyperedge vs Breaker blocking all.
+- **PN/DN recurrence**: OR has $PN=\min PN(child)$, $DN=\sum DN(child)$; AND has $PN=\sum PN(child)$, $DN=\min DN(child)$.
+- **Most-proving selection loop**: Iteratively select the most-proving leaf, expand it, initialize PN/DN for new leaves, and back up values until the root is solved.
+
+### C) Search Reductions (PNS+)
+- **Potential + breaker-win stop**: Compute $pot(b)=\sum_l x_l 2^{-(l-1)}$ from l-lines; if Breaker to move and $pot(b)<1$, declare Breaker win.
+- **Maker-win stop**: Detect immediate Maker wins by a crossing of two 2-lines (Theorem IV.1).
+- **Forced move pruning**: If a 1-line exists or a 2-line crossing exists, restrict legal moves to the forced responses.
+- **Dead-square elimination**: Remove empty squares not belonging to any active line.
+- **Dominated-square / partial pairing**: Remove pairs of squares that lie only in a single line; for 2-lines, bias Maker to the dominating square.
+- **Simplify-to-fixpoint**: Apply the reductions repeatedly in a `simplify(state)` routine before generating children.
+
+### D) Avoiding Repeats + Decomposition
+- **Transposition table**: Canonicalize positions and memoize nodes to turn the tree into a DAG.
+- **Horizontal symmetry**: Use the min of (board, reflected) as the hash key.
+- **(Optional) Hypergraph isomorphy**: Canonical-form merging (often more expensive than the savings).
+- **Component decomposition**: Split the residual hypergraph and solve components independently; handle articulation/cut-vertex cases using Theorems IV.2 and IV.3.
+
+### E) Heuristic PN/DN Initialization
+- **DN heuristic from potential**: Use $\alpha^{pot(b)}$ (paper uses $\alpha=1000$) with OR-node adjustments relative to parent AND-node potential.
+- **PN via logistic regression**: Predict Breaker-win probability from node type, empty squares, and potential; set $PN=1+\beta\cdot P(\text{breaker win})$ (paper uses $\beta=10$).
+
 ### Potential Formula
 
 The potential is computed as:

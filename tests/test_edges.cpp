@@ -7,20 +7,29 @@ void test_edge_generation();
 
 namespace {
 
+bool has_edge(const std::vector<game::Hyperedge>& edges, const game::Hyperedge& target) {
+    game::Hyperedge sorted_target = target;
+    std::sort(sorted_target.begin(), sorted_target.end());
+    return std::any_of(edges.begin(), edges.end(), [&](const auto& edge) {
+        return edge == sorted_target;
+    });
+}
+
 void test_edge_count_n10() {
     auto edges = game::EdgeGenerator::generate_edges(10);
     
     // For n=10, we expect:
-    // - Horizontal length-7: 4 rows * 4 positions = 16
-    // - Truncated horizontal (length 4-6 at boundaries): more edges
+    // - Horizontal length-7: 4 rows * 3 positions = 12
+    // - Horizontal length-4 boundaries: 4 rows * 2 = 8
     // - Vertical: 10 columns = 10
     // - Diagonals: (10-4+1)*2 = 14 down-right and up-right
+    // - Extra edges: 6
     
-    // At minimum we should have > 40 edges
-    if (edges.size() < 40) {
+    // At minimum we should have > 45 edges
+    if (edges.size() < 45) {
         test::TestRunner::instance().add_result({
             "test_edge_count_n10", false, 
-            "Expected at least 40 edges, got " + std::to_string(edges.size())
+            "Expected at least 45 edges, got " + std::to_string(edges.size())
         });
         return;
     }
@@ -97,6 +106,44 @@ void test_edge_cells_in_bounds() {
     test::TestRunner::instance().add_result({"test_edge_cells_in_bounds", true, ""});
 }
 
+void test_extra_edges() {
+    auto edges = game::EdgeGenerator::generate_edges(8);
+    
+    if (!has_edge(edges, {{2, 0}, {1, 1}, {0, 2}})) {
+        test::TestRunner::instance().add_result({
+            "test_extra_edges", false,
+            "Missing extra edge {2,0}-{1,1}-{0,2}"
+        });
+        return;
+    }
+    
+    if (!has_edge(edges, {{1, 0}, {0, 1}})) {
+        test::TestRunner::instance().add_result({
+            "test_extra_edges", false,
+            "Missing extra edge {1,0}-{0,1}"
+        });
+        return;
+    }
+    
+    if (!has_edge(edges, {{2, 5}, {1, 6}, {0, 7}})) {
+        test::TestRunner::instance().add_result({
+            "test_extra_edges", false,
+            "Missing extra edge {2,5}-{1,6}-{0,7}"
+        });
+        return;
+    }
+    
+    if (!has_edge(edges, {{1, 6}, {0, 7}})) {
+        test::TestRunner::instance().add_result({
+            "test_extra_edges", false,
+            "Missing extra edge {1,6}-{0,7}"
+        });
+        return;
+    }
+    
+    test::TestRunner::instance().add_result({"test_extra_edges", true, ""});
+}
+
 } // namespace
 
 void test_edge_generation() {
@@ -104,4 +151,5 @@ void test_edge_generation() {
     test_edges_are_canonical();
     test_vertical_edges_n7();
     test_edge_cells_in_bounds();
+    test_extra_edges();
 }
